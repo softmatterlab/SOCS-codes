@@ -1,0 +1,82 @@
+function [x,y,V0,V] = volterra_lotka_symplectic_Euler(x0,y0,dt,Niter,alpha,beta,gamma,delta,implicit_var)
+%VOLTERRA_LOTKA Summary of this function goes here
+%   Prey-predator system
+%   dx/dt = alpha*x-beta*x*y   %preys
+%   dy/dt = delta*x*y-gamma*y   %predators
+%
+%   alpha*x  exponential growth of population of preys
+%   beta*x*y preys eaten by predators
+%   delta*x*y growth of predators because of eating preys
+%   gamma*y   exponential death of predators
+
+% options_label = {'Interpreter','Latex','fontsize',16};
+
+% bx1 = 60;
+% bx2 = 20;
+% by1 = 60;
+% by2 = 20;
+% xwi = 300;
+% ywi = 300;
+%
+% Xpix = bx1 + xwi + bx2;
+% Ypix = by1 + ywi + by2;
+
+if strcmpi(implicit_var,'x')
+    x_implicit = true;
+else
+    x_implicit = false;
+end
+
+V0 = delta*x0-gamma*log(x0)+beta*y0-alpha*log(y0);
+
+x = zeros(Niter+1,1);
+y = zeros(Niter+1,1);
+V = zeros(Niter+1,1);
+
+x(1) = x0;
+y(1) = y0;
+V(1) = V0;
+
+% figure('Position',[10 10 Xpix Ypix]);
+% axes('Position',[bx1 0 xwi 0]/Xpix+[0 by1 0 ywi]/Ypix);
+
+h = dt;
+
+for i=1:Niter
+    
+    if x_implicit
+        newx = x(i)/(1-h*(alpha-beta*y(i)));
+        
+        x(i+1) = x(i)+newx*(alpha-beta*y(i))*dt;
+        y(i+1) = y(i)+y(i)*(delta*newx-gamma)*dt;
+    else
+        newy = y(i)/(1-h*(delta*x(i)-gamma));
+        
+        x(i+1) = x(i)+x(i)*(alpha-beta*newy)*dt;
+        y(i+1) = y(i)+newy*(delta*x(i)-gamma)*dt;
+    end
+    
+    
+    
+    
+    V(i+1) = delta*x(i+1)-gamma*log(x(i+1))+beta*y(i+1)-alpha*log(y(i+1));
+    %     cla;
+    %     hold on;
+    %     plot(x(1:i+1),'.-','color',[0 0.5 0]);
+    %     plot(y(1:i+1),'.-','color',[1 0.5 0]);
+    %     hold off;
+    %     box on;
+    %     legend('preys','predators');
+    %     xlabel('$t$',options_label{:});
+    %     ylabel('$N(x)$',options_label{:});
+    %     drawnow;
+end
+
+
+
+
+
+
+
+end
+
